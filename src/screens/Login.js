@@ -1,6 +1,9 @@
 import {useNavigation} from '@react-navigation/native';
 import {StatusBar} from 'expo-status-bar';
 import React, {useState} from 'react';
+import {Formik} from 'formik';
+import * as Yup from 'yup';
+
 import {
   StyleSheet,
   Text,
@@ -16,42 +19,70 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [isSignedIn, setIsSignedIn] = useState(false);
   const nav = useNavigation();
+  const SignupSchema = Yup.object().shape({
+    email: Yup.string()
+      .email('Invalid email')
+      .required('Please enter a valid email'),
+  });
 
   return (
-    <View style={styles.container}>
-      <StatusBar style="auto" />
-      <View style={styles.inputView}>
-        <TextInput
-          style={styles.TextInput}
-          placeholder="Email         "
-          placeholderTextColor="white"
-          onChangeText={email => setEmail(email)}
-        />
-      </View>
+    <Formik
+      initialValues={{
+        email: '',
+      }}
+      validationSchema={SignupSchema}
+      onSubmit={values =>
+        Alert.alert(JSON.stringify(values)) &&
+        setIsSignedIn(true) &&
+        nav.navigate('Home')
+      }>
+      {({
+        values,
+        errors,
+        touched,
+        handleSubmit,
+        handleChange,
+        setFieldTouched,
+        isValid,
+      }) => (
+        <View style={styles.container}>
+          <View style={styles.inputView}>
+            <TextInput
+              style={styles.TextInput}
+              placeholder="Enter Email ID"
+              placeholderTextColor="white"
+              value={values.email}
+              onChangeText={handleChange('email')}
+              onBlur={() => setFieldTouched('email')}
+            />
+            {touched.email && errors.location && (
+              <Text style={styles.et}>{errors.email}</Text>
+            )}
+          </View>
 
-      <View style={styles.inputView}>
-        <TextInput
-          style={styles.TextInput}
-          placeholder="Password"
-          placeholderTextColor="white"
-          secureTextEntry={true}
-          onChangeText={password => setPassword(password)}
-        />
-      </View>
+          <View style={styles.inputView}>
+            <TextInput
+              style={styles.TextInput}
+              placeholder="Password"
+              placeholderTextColor="white"
+              secureTextEntry={true}
+              onChangeText={password => setPassword(password)}
+            />
+          </View>
 
-      <TouchableOpacity>
-        <Text style={styles.forgot_button}>Forgot Password?</Text>
-      </TouchableOpacity>
+          <TouchableOpacity>
+            <Text style={styles.forgot_button}>Forgot Password?</Text>
+          </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.loginBtn}
-        onPress={isSignedIn => setIsSignedIn(isSignedIn)}>
-        <Text style={{color: 'white'}}>LOGIN</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.rgrBtn} onPress={nav.navigate('Home')}>
-        <Text style={{color: 'black'}}>REGISTER</Text>
-      </TouchableOpacity>
-    </View>
+          <TouchableOpacity style={styles.loginBtn} onPress={handleSubmit}>
+            <Text style={{color: 'white'}}>LOGIN</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.rgrBtn} onPress={handleSubmit}>
+            <Text style={{color: 'black'}}>REGISTER</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </Formik>
   );
 };
 
@@ -61,7 +92,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-
     paddingTop: 300,
   },
 
@@ -74,7 +104,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     width: '90%',
     height: 45,
-
     alignItems: 'center',
     alignSelf: 'center',
     marginVertical: 5,
@@ -103,7 +132,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 50,
     backgroundColor: 'black',
-
     alignSelf: 'center',
   },
   rgrBtn: {
@@ -114,7 +142,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 5,
     backgroundColor: 'white',
-
     alignSelf: 'center',
     borderWidth: 1,
     borderColor: 'black',
